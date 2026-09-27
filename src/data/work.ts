@@ -139,54 +139,101 @@ export const projects: Project[] = [
   {
     slug: "enterprise-network",
     category: "Enterprise Network Design & Security",
-    title: "Segmented Enterprise Network",
-    tags: ["Cisco", "VLANs", "VLSM", "OSPF", "TCP/IP", "DNS"],
+    title: "SkyGrid Networks — Enterprise Network",
+    tags: ["Cisco", "OSPF", "VLANs", "VLSM", "Inter-VLAN Routing", "DNS"],
     summary:
-      "Designed and implemented a segmented enterprise network incorporating VLANs, subnetting, inter-VLAN routing, OSPF and application services.",
+      "Designed and built a segmented multi-department enterprise network with a redundant four-router OSPF core, VLSM addressing, inter-VLAN routing and core services — then verified it end to end with ping and traceroute.",
     cta: "Explore project",
     overview: [
       {
         label: "Objective",
-        value: "Design a network that separates departments, routes efficiently and delivers core services reliably.",
+        value:
+          "Design a network for SkyGrid Networks Ltd that separates the Marketing, Sales and IT departments, routes efficiently over redundant paths and stays reachable end to end.",
       },
       { label: "Environment", value: "Cisco Packet Tracer" },
       { label: "My role", value: "Network designer & implementer" },
-      { label: "Focus", value: "Segmentation, addressing efficiency and dynamic routing" },
+      { label: "Core", value: "Four Cisco routers in a redundant OSPF area 0, connected by /30 serial links" },
+      { label: "Addressing", value: "210.165.10.0/24 subnetted with VLSM across departments and links" },
     ],
     methodology: [
       {
         title: "Requirements & addressing",
-        body: "Planned the address space with VLSM so each segment got a right-sized subnet with room to grow.",
+        body: "Broke 210.165.10.0/24 into right-sized subnets with VLSM — larger blocks for the department LANs and /30s for the point-to-point serial links between routers.",
       },
       {
         title: "Segmentation",
-        body: "Separated departments into VLANs to limit broadcast domains and contain lateral movement.",
+        body: "Separated Marketing, Sales and IT into their own segments, each served by a multilayer switch, to limit broadcast domains and contain lateral movement.",
       },
       {
         title: "Inter-VLAN routing",
-        body: "Configured routing between VLANs so segments communicate only through defined paths.",
+        body: "Used the department multilayer switches to route between VLANs so segments communicate only through defined Layer-3 paths.",
       },
       {
-        title: "Dynamic routing",
-        body: "Deployed OSPF so routes are learned and updated automatically across the network.",
+        title: "Redundant OSPF core",
+        body: "Connected four core routers with redundant serial links and ran OSPF (process 1, all interfaces in area 0) so routes are learned dynamically and re-converge if a link fails.",
       },
       {
-        title: "Services",
-        body: "Integrated application services such as DNS so users reach resources by name.",
+        title: "Services & hardening",
+        body: "Added DNS (network.local), an enable secret, console and VTY line authentication, SSH via RSA keys and a login banner across the core devices.",
       },
       {
         title: "Verification",
-        body: "Tested connectivity and routing end to end to confirm the design behaved as intended.",
+        body: "Confirmed intra-department and inter-department reachability with ping, and used traceroute to prove packets follow the intended multi-hop OSPF paths.",
       },
     ],
-    // TODO: add your topology diagram and configuration screenshots.
-    evidence: [],
+    evidence: [
+      {
+        src: "/images/net1.png",
+        caption: "Full topology — a redundant four-router OSPF core linking the Marketing (blue), Sales (yellow) and IT (green) departments, each with its own multilayer switch and hosts.",
+        width: 865,
+        height: 366,
+      },
+      {
+        src: "/images/net2.png",
+        caption: "The core — point-to-point serial links between the four routers, each labelled with its OSPF cost, giving every department two paths through the backbone.",
+        width: 696,
+        height: 270,
+      },
+      {
+        src: "/images/net3.png",
+        caption: "Intra-department reachability — MKT-01 pinging MKT-08 (210.165.10.35) with 0% packet loss.",
+        width: 555,
+        height: 401,
+      },
+      {
+        src: "/images/net4.png",
+        caption: "Sales department — Sales-05 reaching Sales-12 (210.165.10.77), 4 of 4 replies.",
+        width: 540,
+        height: 400,
+      },
+      {
+        src: "/images/net5.png",
+        caption: "IT department — IT-01 reaching IT-05 (210.165.10.82) across the switched segment.",
+        width: 502,
+        height: 432,
+      },
+      {
+        src: "/images/net6.png",
+        caption: "Inter-department routing — a traceroute from Sales-03 to Sales-08 (210.165.10.53) crossing four routers in five hops, confirming OSPF is forwarding along the intended path.",
+        width: 526,
+        height: 396,
+      },
+    ],
     sections: [
+      {
+        title: "Testing & verification",
+        items: [
+          "Every ping test returned all four replies with 0% loss — where the first packet dropped, ARP resolution explained the one-off delay before traffic settled.",
+          "Traceroute showed a single hop for same-subnet traffic and multiple hops between branches, matching the OSPF-computed paths.",
+          "Redundant serial links mean a failed backbone link re-routes automatically instead of isolating a department.",
+        ],
+      },
       {
         title: "What I learned",
         items: [
           "Segmentation is a security control, not just a tidy diagram.",
-          "Good addressing plans make every later step — routing, services, troubleshooting — easier.",
+          "A VLSM plan drawn up front makes routing, services and troubleshooting all easier later.",
+          "OSPF costs are a design lever — they decide which redundant path traffic actually prefers.",
         ],
       },
     ],
