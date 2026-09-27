@@ -23,8 +23,8 @@ export const site = {
   linkedin: "https://www.linkedin.com/in/isaac-mvodo-7b3105375/",
   github: "https://github.com/isaac-ops-alt",
 
-  // Put your CV at public/cv.pdf and set this to "/cv.pdf". Empty hides the CV buttons.
-  cv: "",
+  // Path to your CV inside public/. Empty hides the CV buttons.
+  cv: "/Isaac_Godwin_Mvodo_Ngoo_Cybersecurity_CV.pdf",
 };
 
 export const socials = [

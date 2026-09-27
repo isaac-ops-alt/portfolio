@@ -24,7 +24,7 @@ All content lives in `src/data/` — you rarely need to touch the components.
 Before going live:
 
 1. Add your email in `src/data/site.ts` (empty values are hidden on the site).
-2. Add your CV as `public/cv.pdf` and set `cv: "/cv.pdf"` in `src/data/site.ts`.
+2. To update your CV, replace the PDF in `public/` (path set in `src/data/site.ts`).
 3. Add case-study screenshots to `public/images/work/` and list them in each project's `evidence` array.
 4. Rewrite each event `takeaway` in your own words.
 

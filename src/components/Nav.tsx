@@ -30,6 +30,8 @@ export default function Nav() {
           {site.cv && (
             <a
               href={site.cv}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 font-mono text-sm text-muted transition-colors hover:text-fg"
             >
               CV <Download className="size-3.5" />
@@ -81,6 +83,8 @@ export default function Nav() {
             {site.cv && (
               <a
                 href={site.cv}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full border border-line-strong px-4 py-3 text-sm"
               >
                 CV <Download className="size-3.5" />

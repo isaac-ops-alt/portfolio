@@ -66,6 +66,8 @@ function Hero() {
             {site.cv ? (
               <a
                 href={site.cv}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-full border border-line-strong px-6 py-3 font-medium transition-colors hover:border-fg"
               >
                 Download CV <Download />
@@ -394,6 +396,8 @@ function Contact() {
           {site.cv && (
             <a
               href={site.cv}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-full border border-line-strong bg-bg/40 px-7 py-3.5 font-medium backdrop-blur transition-colors hover:border-fg"
             >
               Download CV <Download />
