@@ -13,6 +13,12 @@
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-display: var(--font-space), var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
 }
 
 :root {
@@ -70,4 +76,60 @@ body {
 }
 .no-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+/* Status beacon — a breathing core with two staggered radar rings. */
+.beacon {
+  position: relative;
+  display: inline-flex;
+  width: 9px;
+  height: 9px;
+  border-radius: 9999px;
+  background: #34d399;
+  box-shadow: 0 0 6px 1px rgb(52 211 153 / 0.6);
+  animation: beacon-core 2.6s ease-in-out infinite;
+}
+.beacon::before,
+.beacon::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid rgb(52 211 153 / 0.7);
+  animation: beacon-ring 2.6s ease-out infinite;
+}
+.beacon::after {
+  animation-delay: 1.3s;
+}
+
+@keyframes beacon-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(3.6);
+    opacity: 0;
+  }
+}
+
+@keyframes beacon-core {
+  0%,
+  100% {
+    box-shadow: 0 0 5px 1px rgb(52 211 153 / 0.45);
+  }
+  50% {
+    box-shadow: 0 0 11px 3px rgb(52 211 153 / 0.9);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .beacon,
+  .beacon::before,
+  .beacon::after {
+    animation: none;
+  }
+  .beacon::after {
+    display: none;
+  }
 }

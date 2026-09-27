@@ -45,7 +45,7 @@ export default async function CaseStudy(props: PageProps<"/work/[slug]">) {
           <p data-reveal className="font-mono text-xs uppercase tracking-[0.2em] text-accent-soft">
             {project.category}
           </p>
-          <h1 data-reveal className="mt-4 text-4xl font-semibold tracking-tight text-balance sm:text-6xl">
+          <h1 data-reveal className="mt-4 font-display text-4xl font-bold tracking-tight text-balance sm:text-6xl">
             {project.title}
           </h1>
           <p data-reveal className="mt-6 text-lg leading-relaxed text-muted sm:text-xl">
@@ -150,7 +150,7 @@ export default async function CaseStudy(props: PageProps<"/work/[slug]">) {
         >
           <div>
             <p className="font-mono text-xs uppercase tracking-wider text-muted">Next project</p>
-            <p className="mt-2 text-xl font-semibold tracking-tight sm:text-2xl">{next.title}</p>
+            <p className="mt-2 font-display text-xl font-semibold tracking-tight sm:text-2xl">{next.title}</p>
           </div>
           <ArrowRight className="size-6 shrink-0 transition-transform group-hover:translate-x-1" />
         </Link>

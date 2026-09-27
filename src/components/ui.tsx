@@ -13,7 +13,7 @@ export function SectionHeader({ index, eyebrow, title, intro }: { index: string;
       <p className="mb-4 font-mono text-xs uppercase tracking-[0.2em] text-muted">
         <span className="text-accent">{index}</span> / {eyebrow}
       </p>
-      <h2 className="text-3xl font-semibold tracking-tight text-balance sm:text-5xl">{title}</h2>
+      <h2 className="font-display text-3xl font-semibold tracking-tight text-balance sm:text-5xl">{title}</h2>
       {intro && <p className="mt-5 text-lg leading-relaxed text-muted">{intro}</p>}
     </div>
   );
@@ -21,7 +21,11 @@ export function SectionHeader({ index, eyebrow, title, intro }: { index: string;
 
 export function Tag({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-flex items-center rounded-md border border-line bg-surface-2 px-2 py-1 font-mono text-xs text-muted">
+    <span className="group/tag inline-flex cursor-default items-center gap-1.5 rounded-md border border-line bg-surface-2 px-2.5 py-1 font-mono text-xs text-muted transition-colors duration-200 hover:border-accent/60 hover:bg-accent/10 hover:text-accent-soft">
+      <span
+        aria-hidden
+        className="size-1 rounded-full bg-muted transition-colors duration-200 group-hover/tag:bg-accent"
+      />
       {children}
     </span>
   );
@@ -54,7 +58,7 @@ export function ProjectCard({ project, index }: { project: Project; index: numbe
         <span className="font-mono text-xs text-muted">{String(index + 1).padStart(2, "0")}</span>
       </div>
       <p className="font-mono text-xs uppercase tracking-wider text-accent-soft">{project.category}</p>
-      <h3 className="mt-2 text-2xl font-semibold tracking-tight">{project.title}</h3>
+      <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight">{project.title}</h3>
       <p className="mt-3 leading-relaxed text-muted">{project.summary}</p>
       <div className="mt-6 flex flex-wrap gap-2">
         {project.tags.map((t) => (

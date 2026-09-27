@@ -7,7 +7,7 @@ export const site = {
   intro:
     "I explore security, software and emerging technology — while building products and documenting what I learn along the way.",
   location: "London, UK",
-  availability: "Open to cybersecurity internships",
+  availability: "Open to work",
   goal: "Aspiring Cloud Security Analyst",
 
   // Used for SEO + social cards. On Vercel this picks up the production URL automatically;

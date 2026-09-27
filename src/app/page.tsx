@@ -36,16 +36,13 @@ function Hero() {
       />
       <Container className="relative grid items-center gap-12 py-16 md:grid-cols-[1.35fr_0.65fr] md:gap-16">
         <div>
-          <p data-reveal className="mb-8 inline-flex items-center gap-2 rounded-full border border-line bg-surface/60 px-3 py-1.5 font-mono text-xs text-muted backdrop-blur">
-            <span className="relative flex size-2">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-60 motion-reduce:animate-none" />
-              <span className="relative inline-flex size-2 rounded-full bg-emerald-400" />
-            </span>
+          <p data-reveal className="mb-8 inline-flex items-center gap-2.5 rounded-full border border-emerald-400/25 bg-emerald-400/5 px-3.5 py-1.5 font-mono text-xs uppercase tracking-wider text-emerald-300/90 backdrop-blur">
+            <span className="beacon" aria-hidden />
             {site.availability}
           </p>
           <h1
             data-reveal
-            className="text-[clamp(2.4rem,6.4vw,5.25rem)] font-semibold uppercase leading-[0.95] tracking-tight"
+            className="font-display text-[clamp(2.4rem,6.4vw,5.25rem)] font-bold uppercase leading-[0.92] tracking-tight"
           >
             {site.name}
           </h1>
@@ -291,7 +288,7 @@ function About() {
             <p data-reveal className="mb-4 font-mono text-xs uppercase tracking-[0.2em] text-muted">
               <span className="text-accent">05</span> / About
             </p>
-            <h2 data-reveal className="text-4xl font-semibold tracking-tight sm:text-5xl">
+            <h2 data-reveal className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">
               More than the terminal.
             </h2>
             <div data-reveal className="mt-6 space-y-5 text-lg leading-relaxed text-muted">
@@ -307,7 +304,10 @@ function About() {
             </div>
             <ul data-reveal className="mt-8 flex flex-wrap gap-2">
               {["Technology", "Building", "Fitness", "Experiences", "Personal growth"].map((t) => (
-                <li key={t} className="rounded-full border border-line px-4 py-1.5 text-sm">
+                <li
+                  key={t}
+                  className="cursor-default rounded-full border border-line px-4 py-1.5 font-mono text-xs uppercase tracking-wider text-muted transition-colors duration-200 hover:border-accent/60 hover:bg-accent/10 hover:text-accent-soft"
+                >
                   {t}
                 </li>
               ))}
@@ -377,7 +377,7 @@ function Contact() {
         </p>
         <h2
           data-reveal
-          className="max-w-4xl text-[clamp(2.5rem,7vw,5.5rem)] font-semibold leading-[0.95] tracking-tight text-balance"
+          className="max-w-4xl font-display text-[clamp(2.5rem,7vw,5.5rem)] font-bold leading-[0.95] tracking-tight text-balance"
         >
           Let&apos;s build something meaningful.
         </h2>
