@@ -140,57 +140,58 @@ export const projects: Project[] = [
     slug: "enterprise-network",
     category: "Enterprise Network Design & Security",
     title: "SkyGrid Networks — Enterprise Network",
-    tags: ["Cisco", "OSPF", "VLANs", "VLSM", "Inter-VLAN Routing", "DNS"],
+    tags: ["Cisco", "OSPF", "VLANs", "VLSM", "SSH", "DNS"],
     summary:
-      "Designed and built a segmented multi-department enterprise network with a redundant four-router OSPF core, VLSM addressing, inter-VLAN routing and core services — then verified it end to end with ping and traceroute.",
+      "Designed and built a three-tier enterprise WAN for SkyGrid Networks Ltd across three branch sites — redundant OSPF core, VLSM addressing, VLAN segmentation, hardened devices and core services — then verified it end to end with ping and traceroute.",
     cta: "Explore project",
     overview: [
       {
         label: "Objective",
         value:
-          "Design a network for SkyGrid Networks Ltd that separates the Marketing, Sales and IT departments, routes efficiently over redundant paths and stays reachable end to end.",
+          "Design a network for SkyGrid Networks Ltd that links three branch sites, keeps each site's Marketing, Sales and IT traffic separated, and routes efficiently over redundant paths.",
       },
       { label: "Environment", value: "Cisco Packet Tracer" },
       { label: "My role", value: "Network designer & implementer" },
-      { label: "Core", value: "Four Cisco routers in a redundant OSPF area 0, connected by /30 serial links" },
-      { label: "Addressing", value: "210.165.10.0/24 subnetted with VLSM across departments and links" },
+      { label: "Architecture", value: "Three-tier — core routers, distribution multilayer switches, access switches" },
+      { label: "Sites", value: "Warsaw · London · York, each with Marketing, Sales and IT VLANs" },
+      { label: "Addressing", value: "210.165.10.0/24 subnetted with VLSM" },
     ],
     methodology: [
       {
-        title: "Requirements & addressing",
-        body: "Broke 210.165.10.0/24 into right-sized subnets with VLSM — larger blocks for the department LANs and /30s for the point-to-point serial links between routers.",
+        title: "Addressing with VLSM",
+        body: "Split 210.165.10.0/24 into right-sized subnets so each department got only what it needed — for example, in London: Marketing a /28, Sales and IT a /29 each — leaving room to grow without renumbering.",
       },
       {
-        title: "Segmentation",
-        body: "Separated Marketing, Sales and IT into their own segments, each served by a multilayer switch, to limit broadcast domains and contain lateral movement.",
+        title: "Three-tier hierarchy",
+        body: "Built the network in core, distribution and access layers so each layer has one job and traffic stays close to its source.",
       },
       {
-        title: "Inter-VLAN routing",
-        body: "Used the department multilayer switches to route between VLANs so segments communicate only through defined Layer-3 paths.",
+        title: "VLAN segmentation & inter-VLAN routing",
+        body: "Placed Marketing, Sales and IT in separate VLANs at each site, with the distribution multilayer switches acting as their gateways and routing between them.",
       },
       {
-        title: "Redundant OSPF core",
-        body: "Connected four core routers with redundant serial links and ran OSPF (process 1, all interfaces in area 0) so routes are learned dynamically and re-converge if a link fails.",
+        title: "OSPF WAN core",
+        body: "Linked the sites with serial WAN lines between the core routers and ran OSPF (area 0) so paths are learned automatically and re-converge over the redundant links if one fails.",
       },
       {
-        title: "Services & hardening",
-        body: "Added DNS (network.local), an enable secret, console and VTY line authentication, SSH via RSA keys and a login banner across the core devices.",
+        title: "Security hardening",
+        body: "Configured an encrypted enable secret, console and VTY passwords, SSH access (domain name, 1024-bit RSA key pair and a local account) to replace Telnet, and a Message-of-the-Day warning banner.",
       },
       {
-        title: "Verification",
-        body: "Confirmed intra-department and inter-department reachability with ping, and used traceroute to prove packets follow the intended multi-hop OSPF paths.",
+        title: "Services",
+        body: "Added DNS, an HTTP web server and wireless coverage so the network supports real-world services, not just host-to-host reachability.",
       },
     ],
     evidence: [
       {
         src: "/images/net1.png",
-        caption: "Full topology — a redundant four-router OSPF core linking the Marketing (blue), Sales (yellow) and IT (green) departments, each with its own multilayer switch and hosts.",
+        caption: "Full topology — a three-tier design across three branch sites (Warsaw, London, York): a redundant router core over serial WAN links, multilayer switches at the distribution layer and access switches connecting the hosts.",
         width: 865,
         height: 366,
       },
       {
         src: "/images/net2.png",
-        caption: "The core — point-to-point serial links between the four routers, each labelled with its OSPF cost, giving every department two paths through the backbone.",
+        caption: "The core layer — routers joined by serial WAN links, each labelled with its OSPF cost, giving the branches redundant paths through the backbone.",
         width: 696,
         height: 270,
       },
@@ -202,19 +203,19 @@ export const projects: Project[] = [
       },
       {
         src: "/images/net4.png",
-        caption: "Sales department — Sales-05 reaching Sales-12 (210.165.10.77), 4 of 4 replies.",
+        caption: "Sales VLAN — Sales-05 reaching Sales-12 (210.165.10.77), 4 of 4 replies.",
         width: 540,
         height: 400,
       },
       {
         src: "/images/net5.png",
-        caption: "IT department — IT-01 reaching IT-05 (210.165.10.82) across the switched segment.",
+        caption: "IT VLAN — IT-01 reaching IT-05 (210.165.10.82) across the switched segment.",
         width: 502,
         height: 432,
       },
       {
         src: "/images/net6.png",
-        caption: "Inter-department routing — a traceroute from Sales-03 to Sales-08 (210.165.10.53) crossing four routers in five hops, confirming OSPF is forwarding along the intended path.",
+        caption: "Inter-site routing — a traceroute from Sales-03 to Sales-08 (210.165.10.53) crossing four routers in five hops over the OSPF WAN.",
         width: 526,
         height: 396,
       },
@@ -224,8 +225,24 @@ export const projects: Project[] = [
         title: "Testing & verification",
         items: [
           "Every ping test returned all four replies with 0% loss — where the first packet dropped, ARP resolution explained the one-off delay before traffic settled.",
-          "Traceroute showed a single hop for same-subnet traffic and multiple hops between branches, matching the OSPF-computed paths.",
-          "Redundant serial links mean a failed backbone link re-routes automatically instead of isolating a department.",
+          "Traceroute showed a single hop for same-subnet traffic and multiple hops between sites, matching the OSPF-computed paths.",
+          "Both local switching and inter-VLAN routing were confirmed — traffic stayed within a VLAN where it should, and crossed the core only when it had to.",
+        ],
+      },
+      {
+        title: "Troubleshooting",
+        items: [
+          "Wireless clients lost connectivity and pings timed out; switch port Fa0/5 to the wireless router sat down/down.",
+          "The cable was in the wireless router's Internet (WAN) port — moving it to a plain Ethernet port and running 'no shutdown' brought the link up/up and restored reach.",
+          "A pass over each end device's IP, mask and default gateway cleared the remaining VLAN and inter-site conflicts.",
+        ],
+      },
+      {
+        title: "Reliability & resilience",
+        items: [
+          "OSPF senses a failed link and re-routes automatically, with no manual intervention.",
+          "The redundant serial links mean losing one backbone link doesn't isolate a site.",
+          "The three-tier hierarchy isolates faults — a broken access switch or VLAN affects only its own users, not the whole network.",
         ],
       },
       {
@@ -233,7 +250,7 @@ export const projects: Project[] = [
         items: [
           "Segmentation is a security control, not just a tidy diagram.",
           "A VLSM plan drawn up front makes routing, services and troubleshooting all easier later.",
-          "OSPF costs are a design lever — they decide which redundant path traffic actually prefers.",
+          "Most 'network' faults come down to the physical layer and a wrong gateway — check those first.",
         ],
       },
     ],
