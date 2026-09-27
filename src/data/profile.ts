@@ -34,6 +34,8 @@ export type Event = {
   // TODO: replace each takeaway with one sentence in your own words.
   takeaway: string;
   image?: string;
+  // Optional CSS object-position for the card crop, e.g. "50% 40%".
+  pos?: string;
 };
 
 export const events: Event[] = [
@@ -43,23 +45,30 @@ export const events: Event[] = [
     topics: "AI · Data · Cloud",
     takeaway: "How organisations are scaling data and AI — and what it takes to keep it secure.",
     image: "/images/big-data-ldn.jpg",
+    pos: "50% 42%",
   },
   {
     name: "Forensics Europe Expo 2026",
     topics: "Digital Forensics · Investigation · Security",
     takeaway: "The tools and processes behind modern digital investigations.",
+    image: "/images/forensics.jpg",
+    pos: "50% 38%",
   },
   {
     name: "Agentic AI London",
     host: "Vorboss",
     topics: "AI Agents · Infrastructure",
     takeaway: "What AI agents need from the infrastructure underneath them.",
+    image: "/images/agentic.jpg",
+    pos: "60% 32%",
   },
   {
     name: "Next.js Night London",
     host: "Vercel Community",
     topics: "Web · Next.js · Developer Ecosystem",
     takeaway: "Where the modern web platform is heading, from the people building it.",
+    image: "/images/nextjs.jpg",
+    pos: "50% 40%",
   },
 ];
 

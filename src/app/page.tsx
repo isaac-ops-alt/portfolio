@@ -102,8 +102,8 @@ function Hero() {
             <Image
               src="/images/headshot.jpg"
               alt={`Portrait of ${site.name}`}
-              width={1200}
-              height={1490}
+              width={1000}
+              height={1250}
               sizes="(min-width: 768px) 360px, 90vw"
               loading="eager"
               fetchPriority="high"
@@ -245,7 +245,8 @@ function Events() {
                     alt={`${site.name} at ${e.name}`}
                     fill
                     sizes="340px"
-                    className="object-cover object-[50%_60%]"
+                    style={{ objectPosition: e.pos ?? "50% 50%" }}
+                    className="object-cover"
                   />
                 ) : (
                   <div className="absolute inset-0 flex items-end bg-[radial-gradient(circle_at_30%_20%,rgb(124_92_255/0.35),transparent_60%)] p-6">

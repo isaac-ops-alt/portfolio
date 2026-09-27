@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     url: "/",
     title: `${site.name} — Cybersecurity Student`,
     description,
-    images: [{ url: "/images/headshot.jpg", width: 1200, height: 1490, alt: site.name }],
+    images: [{ url: "/images/headshot.jpg", width: 1000, height: 1250, alt: site.name }],
   },
   twitter: { card: "summary_large_image" },
 };
