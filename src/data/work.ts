@@ -71,8 +71,44 @@ export const projects: Project[] = [
         body: "Documented each finding and mapped it to practical fixes a system owner could act on.",
       },
     ],
-    // TODO: add your screenshots (Nmap results, Metasploit scanner, Meterpreter session, network topology).
-    evidence: [],
+    evidence: [
+      {
+        src: "/images/lab1.png",
+        caption: "Reconnaissance — confirming the target's IP on the isolated lab network (ipconfig on the Windows host, ip a on Kali).",
+        width: 965,
+        height: 448,
+      },
+      {
+        src: "/images/lab2.png",
+        caption: "Service enumeration — an Nmap version scan revealing open SMB and RPC ports on the Windows target.",
+        width: 865,
+        height: 374,
+      },
+      {
+        src: "/images/lab3.png",
+        caption: "OS fingerprinting — Nmap OS detection and SMB scripts identifying Windows 7 SP1 and its SMB security configuration.",
+        width: 924,
+        height: 703,
+      },
+      {
+        src: "/images/lab4.png",
+        caption: "Vulnerability validation — Metasploit's MS17-010 module confirming the host is likely vulnerable.",
+        width: 931,
+        height: 574,
+      },
+      {
+        src: "/images/lab5.png",
+        caption: "Post-exploitation — a Meterpreter session running with NT AUTHORITY\\SYSTEM privileges.",
+        width: 911,
+        height: 475,
+      },
+      {
+        src: "/images/lab6.png",
+        caption: "Post-exploitation — extracting local account password hashes from the compromised host.",
+        width: 935,
+        height: 152,
+      },
+    ],
     sections: [
       {
         title: "What I learned",
