@@ -36,15 +36,17 @@ function Hero() {
       <NetworkCanvas />
       <div
         aria-hidden
-        className="orb pointer-events-none absolute left-1/2 top-1/3 size-[640px] rounded-full bg-accent/10 blur-[140px]"
+        className="orb pointer-events-none absolute left-1/2 top-1/3 -mt-[180px] size-[1000px]"
       />
       <Container className="relative grid items-center gap-12 py-16 md:grid-cols-[1.35fr_0.65fr] md:gap-16">
         <div className="hero-copy">
           <p
             style={at(100)}
-            className="intro mb-8 inline-flex items-center gap-2.5 rounded-full border border-emerald-400/25 bg-emerald-400/5 px-3.5 py-1.5 font-mono text-xs uppercase tracking-wider text-emerald-300/90 backdrop-blur"
+            className="intro mb-8 inline-flex items-center gap-2.5 rounded-full border border-emerald-400/25 bg-emerald-400/5 px-3.5 py-1.5 font-mono text-xs uppercase tracking-wider text-emerald-300/90 md:backdrop-blur"
           >
-            <span className="beacon" aria-hidden />
+            <span className="beacon" aria-hidden>
+              <span />
+            </span>
             <span data-scramble data-scramble-delay="300">
               {site.availability}
             </span>
@@ -66,7 +68,7 @@ function Hero() {
             <Link
               href="/#work"
               data-magnetic
-              className="group inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 font-medium text-white hover:bg-accent-soft hover:text-bg"
+              className="group inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-accent px-5 py-3 font-medium text-white hover:bg-accent-soft hover:text-bg sm:flex-none sm:px-6"
             >
               View my work
               <ArrowRight className="size-4 transition-transform duration-500 ease-expo group-hover:translate-x-1" />
@@ -77,7 +79,7 @@ function Hero() {
                 target="_blank"
                 rel="noopener noreferrer"
                 data-magnetic
-                className="group inline-flex items-center gap-2 rounded-full border border-line-strong px-6 py-3 font-medium hover:border-fg"
+                className="group inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-line-strong px-5 py-3 font-medium hover:border-fg sm:flex-none sm:px-6"
               >
                 Download CV
                 <Download className="size-4 transition-transform duration-500 ease-expo group-hover:translate-y-0.5" />
@@ -87,7 +89,7 @@ function Hero() {
                 href={contactHref}
                 {...external(contactHref)}
                 data-magnetic
-                className="group inline-flex items-center gap-2 rounded-full border border-line-strong px-6 py-3 font-medium hover:border-fg"
+                className="group inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-line-strong px-5 py-3 font-medium hover:border-fg sm:flex-none sm:px-6"
               >
                 Get in touch
                 <ArrowRight className="size-4 transition-transform duration-500 ease-expo group-hover:translate-x-1" />
@@ -280,9 +282,9 @@ function Events() {
           intro="I put myself in rooms where I can learn from people building the future of security, data and AI."
         />
       </Container>
-      <div className="mx-auto max-w-6xl">
+      <div className="rail mx-auto max-w-6xl">
         <ul
-          className="rail-fade no-scrollbar flex snap-x snap-mandatory gap-5 overflow-x-auto px-4 pb-4 sm:px-6"
+          className="no-scrollbar flex snap-x snap-mandatory gap-5 overflow-x-auto px-4 pb-4 sm:px-6"
           aria-label="Events attended"
         >
           {events.map((e, i) => (
@@ -449,7 +451,7 @@ function Contact() {
             href={contactHref}
             {...external(contactHref)}
             data-magnetic
-            className="group inline-flex items-center gap-2 rounded-full bg-fg px-7 py-3.5 font-medium text-bg hover:bg-accent-soft"
+            className="group inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-fg px-5 py-3.5 font-medium text-bg hover:bg-accent-soft sm:flex-none sm:px-7"
           >
             Get in touch
             <ArrowRight className="size-4 transition-transform duration-500 ease-expo group-hover:translate-x-1" />
@@ -460,7 +462,7 @@ function Contact() {
               target="_blank"
               rel="noopener noreferrer"
               data-magnetic
-              className="group inline-flex items-center gap-2 rounded-full border border-line-strong bg-bg/40 px-7 py-3.5 font-medium backdrop-blur hover:border-fg"
+              className="group inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-line-strong bg-bg/60 px-5 py-3.5 font-medium hover:border-fg sm:flex-none sm:px-7 md:bg-bg/40 md:backdrop-blur"
             >
               Download CV
               <Download className="size-4 transition-transform duration-500 ease-expo group-hover:translate-y-0.5" />

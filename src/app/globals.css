@@ -227,33 +227,46 @@ body {
   }
 }
 
-/* A comet of light orbiting the portrait frame. */
-@property --angle {
-  syntax: "<angle>";
-  inherits: false;
-  initial-value: 0deg;
-}
+/* A comet of light orbiting the portrait frame. The conic gradient sits on an
+   oversized square that rotates (a GPU-only transform), clipped to the frame;
+   the portrait covers all of it except the 1px rim. */
 .frame-glow {
-  background:
-    conic-gradient(
-      from var(--angle),
-      transparent 0 62%,
-      rgb(124 92 255 / 0.85) 76%,
-      rgb(169 155 255) 80%,
-      transparent 90%
-    ),
-    linear-gradient(to bottom, rgb(124 92 255 / 0.45), rgb(255 255 255 / 0.08) 45%, transparent);
+  overflow: hidden;
+  background: linear-gradient(to bottom, rgb(124 92 255 / 0.45), rgb(255 255 255 / 0.08) 45%, transparent);
+}
+.frame-glow::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 200%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  background: conic-gradient(
+    transparent 0 62%,
+    rgb(124 92 255 / 0.85) 76%,
+    rgb(169 155 255) 80%,
+    transparent 90%
+  );
   animation: orbit 9s linear infinite;
 }
 @keyframes orbit {
   to {
-    --angle: 360deg;
+    rotate: 1turn;
   }
 }
 
-/* Ambient glow behind the hero drifts like slow breathing. */
+/* Ambient glow behind the hero drifts like slow breathing. A radial gradient
+   rather than a blurred circle: it looks the same but costs nothing per frame. */
 .orb {
   translate: -50% 0;
+  background: radial-gradient(
+    closest-side,
+    rgb(124 92 255 / 0.11),
+    rgb(124 92 255 / 0.07) 40%,
+    rgb(124 92 255 / 0.025) 70%,
+    transparent
+  );
   animation: orb-drift 16s ease-in-out infinite alternate;
 }
 @keyframes orb-drift {
@@ -318,7 +331,16 @@ body {
   height: 9px;
   border-radius: 9999px;
   background: #34d399;
-  box-shadow: 0 0 6px 1px rgb(52 211 153 / 0.6);
+  box-shadow: 0 0 5px 1px rgb(52 211 153 / 0.45);
+}
+/* The breathing glow is its own layer animating opacity, which the GPU can
+   run alone — animating box-shadow would repaint on every frame. */
+.beacon > span {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 11px 3px rgb(52 211 153 / 0.9);
+  opacity: 0;
   animation: beacon-core 2.6s ease-in-out infinite;
 }
 .beacon::before,
@@ -346,12 +368,8 @@ body {
 }
 
 @keyframes beacon-core {
-  0%,
-  100% {
-    box-shadow: 0 0 5px 1px rgb(52 211 153 / 0.45);
-  }
   50% {
-    box-shadow: 0 0 11px 3px rgb(52 211 153 / 0.9);
+    opacity: 1;
   }
 }
 
@@ -513,16 +531,24 @@ body {
   scale: 1 1;
 }
 
-/* Horizontal rail fades out at its trailing edge (the fade clears once the
-   rail is scrolled to its end, where supported). */
-@property --rail-fade {
-  syntax: "<length>";
-  inherits: false;
-  initial-value: 56px;
+/* Horizontal rail fades out at its trailing edge. The fade is an overlay so
+   that clearing it at the end of the rail is a cheap opacity change. */
+.rail {
+  position: relative;
+  timeline-scope: --rail;
 }
-.rail-fade {
-  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - var(--rail-fade)), transparent);
-  mask-image: linear-gradient(to right, #000 calc(100% - var(--rail-fade)), transparent);
+.rail > ul {
+  scroll-timeline: --rail inline;
+}
+.rail::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 1rem;
+  width: 56px;
+  pointer-events: none;
+  background: linear-gradient(to left, var(--color-bg), transparent);
 }
 
 /* ------------------------------------------------------------------ */
@@ -624,26 +650,32 @@ body {
       animation-timeline: scroll(root block);
     }
 
-    /* Hero recedes as you scroll past it. */
+    /* The network fades as you scroll past the hero. */
     .hero {
       view-timeline: --hero block;
     }
+    .hero-fade,
     .hero-copy,
-    .hero-portrait,
-    .hero-fade {
+    .hero-portrait {
       animation-timeline: --hero;
       animation-range: exit 0% exit 90%;
       animation-fill-mode: both;
       animation-timing-function: linear;
     }
-    .hero-copy {
-      animation-name: hero-copy-out;
-    }
-    .hero-portrait {
-      animation-name: hero-portrait-out;
-    }
     .hero-fade {
       animation-name: fade-out;
+    }
+
+    /* On side-by-side layouts the whole hero recedes. Not on phones: there
+       the hero is taller than the screen, so it would fade the portrait and
+       copy while they are still being read. */
+    @media (min-width: 48rem) {
+      .hero-copy {
+        animation-name: hero-copy-out;
+      }
+      .hero-portrait {
+        animation-name: hero-portrait-out;
+      }
     }
 
     /* Timeline progress fills as the list passes through the viewport. */
@@ -672,17 +704,11 @@ body {
       animation-range: entry 0% exit 60%;
     }
 
-    .rail-fade {
-      animation: rail-end linear both;
-      animation-timeline: scroll(self inline);
+    .rail::after {
+      animation: fade-out linear both;
+      animation-timeline: --rail;
       animation-range: 85% 100%;
     }
-  }
-}
-
-@keyframes rail-end {
-  to {
-    --rail-fade: 0px;
   }
 }
 

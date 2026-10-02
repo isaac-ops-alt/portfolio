@@ -17,10 +17,13 @@ export default function Nav() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
-  const [active, setActive] = useState<string | null>(null);
+  const [tracked, setTracked] = useState<string | null>(null);
+  // Section highlighting only applies on the homepage.
+  const active = onHome ? tracked : null;
 
   // Scroll state: solid background once scrolled, tuck away while reading
-  // downwards, return on any upward scroll, and track the current section.
+  // downwards, return on any upward scroll. Only reads scrollY, so it never
+  // forces layout mid-scroll.
   useEffect(() => {
     let lastY = window.scrollY;
     let raf = 0;
@@ -30,23 +33,10 @@ export default function Nav() {
       const y = window.scrollY;
       const dy = y - lastY;
       lastY = y;
-
       setScrolled(y > 8);
       if (y < 160) setHidden(false);
       else if (dy > 6) setHidden(true);
       else if (dy < -6) setHidden(false);
-
-      // The last nav section whose top has crossed 40% of the viewport is
-      // current; Contact has its own button, so it clears the pill.
-      let current: string | null = null;
-      if (onHome) {
-        const line = window.innerHeight * 0.4;
-        for (const id of [...sectionIds, "contact"]) {
-          const el = document.getElementById(id);
-          if (el && el.getBoundingClientRect().top <= line) current = id === "contact" ? null : id;
-        }
-      }
-      setActive(current);
     };
 
     const onScroll = () => {
@@ -54,12 +44,37 @@ export default function Nav() {
     };
     update();
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll, { passive: true });
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
     };
+  }, []);
+
+  // Current section: the last nav section whose top has crossed a line 40%
+  // down the viewport. Sections in between (Stack, Events) keep the previous
+  // one lit; Contact has its own button, so it clears the pill.
+  useEffect(() => {
+    if (!onHome) return;
+    const order = [...sectionIds, "contact"];
+    const passed = new Set<string>();
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          // Touching the line, or entirely above it, means it has been reached.
+          const reached = entry.isIntersecting || entry.boundingClientRect.top < window.innerHeight * 0.4;
+          if (reached) passed.add(entry.target.id);
+          else passed.delete(entry.target.id);
+        }
+        const current = order.findLast((id) => passed.has(id)) ?? null;
+        setTracked(current === "contact" ? null : current);
+      },
+      { rootMargin: "-40% 0px -60% 0px" },
+    );
+    order.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) io.observe(el);
+    });
+    return () => io.disconnect();
   }, [onHome]);
 
   useEffect(() => {
@@ -102,7 +117,9 @@ export default function Nav() {
       data-hidden={hidden && !open ? "" : undefined}
       style={{ viewTransitionName: "site-header" }}
       className={`site-header fixed inset-x-0 top-0 z-50 border-b ${
-        solid ? "border-line bg-bg/75 backdrop-blur-md" : "border-transparent bg-transparent"
+        // Frosted glass on desktop only: blurring content as it scrolls
+        // underneath is one of the heaviest things a phone GPU can be asked to do.
+        solid ? "border-line bg-bg/90 md:bg-bg/75 md:backdrop-blur-md" : "border-transparent bg-transparent"
       }`}
     >
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
