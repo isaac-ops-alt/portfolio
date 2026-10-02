@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Space_Grotesk } from "next/font/google";
 import Nav from "@/components/Nav";
+import PointerEffects from "@/components/PointerEffects";
 import RevealObserver from "@/components/RevealObserver";
 import { site } from "@/data/site";
 import "./globals.css";
@@ -47,6 +48,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
+      // Smooth scrolling for in-page anchors only; route changes jump instantly
+      // so they never fight the page transition.
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} antialiased`}
     >
@@ -71,6 +75,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           </div>
         </footer>
         <RevealObserver />
+        <PointerEffects />
       </body>
     </html>
   );

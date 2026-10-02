@@ -14,6 +14,10 @@
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
   --font-display: var(--font-space), var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+
+  /* Motion: one decisive curve for arrivals, one for things that travel. */
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-glide: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 .font-display {
@@ -46,31 +50,6 @@ body {
   border-radius: 6px;
 }
 
-/* Scroll reveal: content is only hidden once JS is confirmed running. */
-.js [data-reveal] {
-  opacity: 0;
-  transform: translateY(15px);
-  transition:
-    opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1),
-    transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
-  transition-delay: var(--reveal-delay, 0ms);
-}
-.js [data-reveal][data-visible] {
-  opacity: 1;
-  transform: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-  .js [data-reveal] {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-}
-
 .no-scrollbar {
   scrollbar-width: none;
 }
@@ -78,7 +57,260 @@ body {
   display: none;
 }
 
-/* Status beacon — a breathing core with two staggered radar rings. */
+/* ------------------------------------------------------------------ */
+/* Scroll reveal — content is only hidden once JS is confirmed running. */
+/* ------------------------------------------------------------------ */
+
+.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(15px);
+  transition:
+    opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 0.9s var(--ease-expo);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.js [data-reveal][data-visible] {
+  opacity: 1;
+  transform: none;
+}
+
+/* Images unmask from their centre instead of sliding. --clip-r matches the
+   element's corner radius. */
+.js [data-reveal="clip"] {
+  opacity: 1;
+  transform: none;
+  clip-path: inset(10% 8% 10% 8% round var(--clip-r, 1.5rem));
+  transition: clip-path 1.3s var(--ease-expo);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.js [data-reveal="clip"][data-visible] {
+  clip-path: inset(0 round var(--clip-r, 1.5rem));
+}
+
+/* Children of a [data-stagger] list cascade in after their revealed parent
+   (or after the list itself, when the list is the revealed element). */
+.js [data-reveal] [data-stagger] > *,
+.js [data-reveal][data-stagger] > * {
+  opacity: 0;
+  translate: 0 8px;
+  transition:
+    opacity 0.5s ease-out,
+    translate 0.7s var(--ease-expo);
+  transition-delay: calc(var(--reveal-delay, 0ms) + 160ms + var(--i, 0) * 40ms);
+}
+.js [data-reveal][data-visible] [data-stagger] > *,
+.js [data-reveal][data-visible][data-stagger] > * {
+  opacity: 1;
+  translate: none;
+}
+
+/* Used for one frame after a client-side navigation so on-screen content is
+   already settled when the view transition takes its snapshot. */
+.reveal-instant [data-reveal],
+.reveal-instant [data-reveal]::after,
+.reveal-instant [data-reveal] * {
+  transition: none !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Masked word rise — headings lift out from behind their baseline.    */
+/* ------------------------------------------------------------------ */
+
+/* The mask's bottom padding leaves room for descenders on tightly leaded
+   headings; the negative margin cancels it so layout is unchanged. Words
+   start one full height plus that padding below, i.e. fully hidden. */
+.word {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding: 0 0.04em 0.24em;
+  margin: 0 -0.04em -0.24em;
+}
+.word > span {
+  display: inline-block;
+}
+
+.js [data-reveal] .word > span {
+  translate: 0 calc(100% + 0.24em);
+  transition: translate 1.1s var(--ease-expo);
+  transition-delay: calc(var(--reveal-delay, 0ms) + 60ms + var(--i, 0) * 45ms);
+}
+.js [data-reveal][data-visible] .word > span {
+  translate: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* Page-load choreography (pure CSS, so it never waits on hydration).  */
+/* ------------------------------------------------------------------ */
+
+.intro {
+  animation: intro-up 1s var(--ease-expo) both;
+  animation-delay: var(--d, 0ms);
+}
+.intro-words .word > span {
+  animation: word-rise 1.2s var(--ease-expo) both;
+  animation-delay: calc(var(--d, 0ms) + var(--i, 0) * 75ms);
+}
+
+@keyframes intro-up {
+  from {
+    opacity: 0;
+    translate: 0 18px;
+  }
+}
+@keyframes word-rise {
+  from {
+    translate: 0 calc(100% + 0.24em);
+  }
+}
+
+/* Portrait: a scanner sweeps down and the image resolves behind it. */
+.portrait-reveal {
+  animation: unmask-down 1.5s var(--ease-glide) both;
+  animation-delay: var(--d, 0ms);
+}
+.portrait-reveal img {
+  animation: settle 2s var(--ease-expo) both;
+  animation-delay: var(--d, 0ms);
+}
+.scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  animation: scan-down 1.5s var(--ease-glide) both;
+  animation-delay: var(--d, 0ms);
+}
+.scan::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 100%;
+  height: 45%;
+  background: linear-gradient(to bottom, transparent, rgb(124 92 255 / 0.28));
+}
+.scan::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: -1px;
+  height: 2px;
+  background: var(--color-accent-soft);
+  box-shadow:
+    0 0 14px 2px rgb(124 92 255 / 0.9),
+    0 0 40px 6px rgb(124 92 255 / 0.35);
+}
+
+@keyframes unmask-down {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@keyframes settle {
+  from {
+    scale: 1.14;
+  }
+}
+@keyframes scan-down {
+  from {
+    translate: 0 0;
+    opacity: 1;
+  }
+  88% {
+    opacity: 1;
+  }
+  to {
+    translate: 0 100%;
+    opacity: 0;
+  }
+}
+
+/* A comet of light orbiting the portrait frame. */
+@property --angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+.frame-glow {
+  background:
+    conic-gradient(
+      from var(--angle),
+      transparent 0 62%,
+      rgb(124 92 255 / 0.85) 76%,
+      rgb(169 155 255) 80%,
+      transparent 90%
+    ),
+    linear-gradient(to bottom, rgb(124 92 255 / 0.45), rgb(255 255 255 / 0.08) 45%, transparent);
+  animation: orbit 9s linear infinite;
+}
+@keyframes orbit {
+  to {
+    --angle: 360deg;
+  }
+}
+
+/* Ambient glow behind the hero drifts like slow breathing. */
+.orb {
+  translate: -50% 0;
+  animation: orb-drift 16s ease-in-out infinite alternate;
+}
+@keyframes orb-drift {
+  0% {
+    translate: -50% 0;
+    scale: 1;
+  }
+  50% {
+    translate: -42% 8%;
+    scale: 1.1;
+  }
+  100% {
+    translate: -58% -4%;
+    scale: 0.94;
+  }
+}
+
+/* "Scroll" cue: a pulse travels down a hairline. Only on screens tall
+   enough that it can't collide with the hero content. */
+.scroll-cue {
+  display: none;
+}
+@media (min-width: 48rem) and (min-height: 820px) {
+  .scroll-cue {
+    display: flex;
+  }
+}
+.cue-line {
+  position: relative;
+  width: 1px;
+  height: 44px;
+  overflow: hidden;
+  background: var(--color-line-strong);
+}
+.cue-line::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 40%;
+  background: var(--color-accent-soft);
+  animation: cue 2.4s var(--ease-glide) infinite;
+}
+@keyframes cue {
+  from {
+    translate: 0 -100%;
+  }
+  to {
+    translate: 0 260%;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Status beacon — a breathing core with two staggered radar rings.    */
+/* ------------------------------------------------------------------ */
+
 .beacon {
   position: relative;
   display: inline-flex;
@@ -123,13 +355,519 @@ body {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .beacon,
-  .beacon::before,
-  .beacon::after {
-    animation: none;
+/* ------------------------------------------------------------------ */
+/* Decrypt text — the real text stays in the DOM; glyphs sit on top.   */
+/* ------------------------------------------------------------------ */
+
+[data-scramble],
+[data-scramble-text] {
+  display: inline-block;
+  position: relative;
+}
+.scrambling {
+  -webkit-text-fill-color: transparent;
+}
+.scramble-overlay {
+  position: absolute;
+  inset: 0;
+  white-space: pre-wrap;
+  pointer-events: none;
+  -webkit-text-fill-color: initial;
+}
+
+/* ------------------------------------------------------------------ */
+/* Pointer spotlight — position comes from --mx / --my (PointerEffects). */
+/* ------------------------------------------------------------------ */
+
+/* Grids drawn with 1px gaps: the light shows only through the gaps. */
+.spotlight-grid {
+  position: relative;
+  isolation: isolate;
+}
+.spotlight-grid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    380px circle at var(--mx, 50%) var(--my, 50%),
+    rgb(169 155 255 / 0.75),
+    rgb(124 92 255 / 0.25) 40%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+/* Cards: a lit border plus a soft wash beneath the cursor. */
+.spotlight-card {
+  position: relative;
+  isolation: isolate;
+}
+.spotlight-card::before,
+.spotlight-card::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.spotlight-card::before {
+  inset: -1px;
+  padding: 1px;
+  background: radial-gradient(
+    280px circle at var(--mx, 50%) var(--my, 50%),
+    rgb(169 155 255 / 0.9),
+    transparent 70%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+}
+.spotlight-card::after {
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(
+    460px circle at var(--mx, 50%) var(--my, 50%),
+    rgb(124 92 255 / 0.13),
+    transparent 65%
+  );
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .spotlight-grid:hover::before,
+  .spotlight-card:hover::before,
+  .spotlight-card:hover::after {
+    opacity: 1;
   }
-  .beacon::after {
+}
+
+/* Magnetic CTAs ease toward the cursor; the offset is set from JS. */
+[data-magnetic] {
+  transition:
+    translate 0.5s var(--ease-expo),
+    color 0.2s,
+    background-color 0.2s,
+    border-color 0.2s;
+}
+
+/* ------------------------------------------------------------------ */
+/* Timelines and lists                                                 */
+/* ------------------------------------------------------------------ */
+
+/* Nodes light up as their entry arrives. */
+.node,
+.node-ring {
+  transition:
+    background-color 0.6s ease,
+    border-color 0.6s ease,
+    box-shadow 0.6s ease,
+    color 0.6s ease;
+  transition-delay: calc(var(--reveal-delay, 0ms) + 220ms);
+}
+.js [data-visible] .node {
+  border-color: var(--color-accent);
+  background-color: var(--color-accent);
+  box-shadow:
+    0 0 0 4px rgb(124 92 255 / 0.15),
+    0 0 14px rgb(124 92 255 / 0.7);
+}
+.js [data-visible] .node-ring {
+  border-color: rgb(124 92 255 / 0.6);
+  color: var(--color-fg);
+  box-shadow:
+    0 0 0 4px rgb(124 92 255 / 0.08),
+    0 0 18px rgb(124 92 255 / 0.25);
+}
+
+/* Progress line along a timeline. Filled by scroll where supported. */
+.track-fill {
+  display: none;
+}
+
+/* Row dividers draw themselves left to right. */
+.rule {
+  position: relative;
+}
+.rule::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--color-line);
+  transform-origin: left;
+}
+.js .rule[data-reveal]::after {
+  scale: 0 1;
+  transition: scale 1.2s var(--ease-expo);
+  transition-delay: calc(var(--reveal-delay, 0ms) + 100ms);
+}
+.js .rule[data-reveal][data-visible]::after {
+  scale: 1 1;
+}
+
+/* Horizontal rail fades out at its trailing edge (the fade clears once the
+   rail is scrolled to its end, where supported). */
+@property --rail-fade {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 56px;
+}
+.rail-fade {
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - var(--rail-fade)), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - var(--rail-fade)), transparent);
+}
+
+/* ------------------------------------------------------------------ */
+/* Header                                                              */
+/* ------------------------------------------------------------------ */
+
+.site-header {
+  transition:
+    translate 0.5s var(--ease-expo),
+    background-color 0.4s ease,
+    border-color 0.4s ease;
+}
+.site-header[data-hidden]:not(:focus-within) {
+  translate: 0 -100%;
+}
+
+.nav-pill {
+  transition:
+    translate 0.5s var(--ease-expo),
+    width 0.5s var(--ease-expo),
+    opacity 0.3s ease;
+}
+
+.scroll-progress {
+  display: none;
+}
+
+/* Hamburger bars fold into a cross. */
+.burger > span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 18px;
+  height: 1.5px;
+  margin: -0.75px 0 0 -9px;
+  border-radius: 1px;
+  background: currentColor;
+  transition:
+    translate 0.4s var(--ease-expo),
+    rotate 0.4s var(--ease-expo);
+}
+.burger > span:first-child {
+  translate: 0 -4px;
+}
+.burger > span:last-child {
+  translate: 0 4px;
+}
+[aria-expanded="true"] .burger > span:first-child {
+  translate: 0 0;
+  rotate: 45deg;
+}
+[aria-expanded="true"] .burger > span:last-child {
+  translate: 0 0;
+  rotate: -45deg;
+}
+
+/* Mobile menu unfolds; its items cascade in. */
+.mobile-menu {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.5s var(--ease-expo);
+}
+.mobile-menu[data-open] {
+  grid-template-rows: 1fr;
+}
+@media (min-width: 48rem) {
+  .mobile-menu {
     display: none;
+  }
+}
+.mobile-menu > div {
+  min-height: 0;
+  overflow: hidden;
+}
+.mobile-menu [data-item] {
+  opacity: 0;
+  translate: 0 -8px;
+  transition:
+    opacity 0.25s ease,
+    translate 0.5s var(--ease-expo);
+}
+.mobile-menu[data-open] [data-item] {
+  opacity: 1;
+  translate: none;
+  transition-delay: calc(90ms + var(--i, 0) * 45ms);
+}
+
+/* ------------------------------------------------------------------ */
+/* Scroll-driven motion (progressive enhancement).                     */
+/* ------------------------------------------------------------------ */
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* Reading progress along the bottom edge of the header. */
+    .scroll-progress {
+      display: block;
+      transform-origin: left;
+      animation: grow-x linear both;
+      animation-timeline: scroll(root block);
+    }
+
+    /* Hero recedes as you scroll past it. */
+    .hero {
+      view-timeline: --hero block;
+    }
+    .hero-copy,
+    .hero-portrait,
+    .hero-fade {
+      animation-timeline: --hero;
+      animation-range: exit 0% exit 90%;
+      animation-fill-mode: both;
+      animation-timing-function: linear;
+    }
+    .hero-copy {
+      animation-name: hero-copy-out;
+    }
+    .hero-portrait {
+      animation-name: hero-portrait-out;
+    }
+    .hero-fade {
+      animation-name: fade-out;
+    }
+
+    /* Timeline progress fills as the list passes through the viewport. */
+    .track-fill {
+      display: block;
+      transform-origin: top;
+      animation: grow-y linear both;
+      animation-timeline: view();
+      animation-range: entry 30% cover 55%;
+    }
+
+    /* Photos drift inside their frames. Frames must use overflow: clip, not
+       hidden: a hidden-overflow box is a scroll container and would capture
+       view(), freezing the drift. */
+    .parallax {
+      scale: 1.12;
+      animation: drift linear both;
+      animation-timeline: view();
+      animation-range: cover;
+    }
+
+    /* The contact backdrop slowly pulls focus as it arrives. */
+    .zoom-in-view {
+      animation: pull-back linear both;
+      animation-timeline: view();
+      animation-range: entry 0% exit 60%;
+    }
+
+    .rail-fade {
+      animation: rail-end linear both;
+      animation-timeline: scroll(self inline);
+      animation-range: 85% 100%;
+    }
+  }
+}
+
+@keyframes rail-end {
+  to {
+    --rail-fade: 0px;
+  }
+}
+
+@keyframes grow-x {
+  from {
+    scale: 0 1;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+@keyframes grow-y {
+  from {
+    scale: 1 0;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+@keyframes hero-copy-out {
+  to {
+    translate: 0 -14vh;
+    opacity: 0;
+  }
+}
+@keyframes hero-portrait-out {
+  to {
+    translate: 0 -6vh;
+    scale: 0.94;
+    opacity: 0.15;
+  }
+}
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes drift {
+  from {
+    translate: 0 -5%;
+  }
+  to {
+    translate: 0 5%;
+  }
+}
+@keyframes pull-back {
+  from {
+    scale: 1.18;
+  }
+  to {
+    scale: 1;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Route transitions (React <ViewTransition> + View Transitions API).  */
+/* ------------------------------------------------------------------ */
+
+::view-transition {
+  pointer-events: none;
+}
+
+/* The header is the spatial anchor: it never moves between pages. */
+::view-transition-group(site-header) {
+  animation: none;
+  z-index: 100;
+}
+::view-transition-old(site-header) {
+  display: none;
+}
+::view-transition-new(site-header) {
+  animation: none;
+}
+
+/* Shared elements: project icon and title travel between card and case study. */
+::view-transition-group(.morph),
+::view-transition-group(.morph-text) {
+  animation-duration: 600ms;
+  animation-timing-function: var(--ease-expo);
+}
+::view-transition-image-pair(.morph),
+::view-transition-image-pair(.morph-text) {
+  animation-name: via-blur;
+  animation-duration: 600ms;
+}
+/* Scale text by its height so a re-wrapped title never stretches sideways. */
+::view-transition-old(.morph-text),
+::view-transition-new(.morph-text) {
+  inline-size: auto;
+  block-size: 100%;
+}
+@keyframes via-blur {
+  35% {
+    filter: blur(4px);
+  }
+}
+
+/* Directional slides: forward goes deeper, back returns. */
+::view-transition-old(.nav-forward) {
+  --slide-offset: -60px;
+  animation:
+    160ms ease-in both vt-fade reverse,
+    420ms var(--ease-glide) both vt-slide reverse;
+}
+::view-transition-new(.nav-forward) {
+  --slide-offset: 60px;
+  animation:
+    240ms ease-out 160ms both vt-fade,
+    420ms var(--ease-glide) both vt-slide;
+}
+::view-transition-old(.nav-back) {
+  --slide-offset: 60px;
+  animation:
+    160ms ease-in both vt-fade reverse,
+    420ms var(--ease-glide) both vt-slide reverse;
+}
+::view-transition-new(.nav-back) {
+  --slide-offset: -60px;
+  animation:
+    240ms ease-out 160ms both vt-fade,
+    420ms var(--ease-glide) both vt-slide;
+}
+
+@keyframes vt-fade {
+  from {
+    opacity: 0;
+    filter: blur(3px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+@keyframes vt-slide {
+  from {
+    translate: var(--slide-offset);
+  }
+  to {
+    translate: 0;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Reduced motion: keep everything visible, drop the movement.         */
+/* ------------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+  }
+  .js [data-reveal] {
+    opacity: 1;
+    transform: none;
+    clip-path: none;
+  }
+  /* Kept apart from the rule above: when `translate` and `transform` share a
+     rule, the CSS optimiser folds both into one transform and drops translate. */
+  .js [data-reveal] [data-stagger] > *,
+  .js [data-reveal][data-stagger] > *,
+  .js [data-reveal] .word > span {
+    opacity: 1;
+    translate: none;
+  }
+  .js .rule[data-reveal]::after {
+    scale: 1 1;
+  }
+  .beacon::after,
+  .scan,
+  .cue-line::after {
+    display: none;
+  }
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*),
+  ::view-transition-image-pair(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
   }
 }

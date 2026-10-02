@@ -2,9 +2,11 @@
 
 import { useEffect, useRef } from "react";
 
-type Node = { x: number; y: number; vx: number; vy: number };
+type Node = { x: number; y: number; vx: number; vy: number; flash: number };
+type Packet = { from: Node; to: Node; t: number; speed: number };
 
-// A quiet network of drifting nodes that lights up around the cursor.
+// A quiet network of drifting nodes that lights up around the cursor, with the
+// occasional data packet travelling along a live link. Fades in on load.
 // Pauses when off-screen or in a background tab; static when reduced motion is on.
 export default function NetworkCanvas() {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -17,13 +19,17 @@ export default function NetworkCanvas() {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const mouse = { x: -9999, y: -9999 };
     let nodes: Node[] = [];
+    let packets: Packet[] = [];
     let w = 0;
     let h = 0;
     let raf = 0;
     let running = false;
+    const born = performance.now();
 
     const LINK = 130;
     const REACH = 170;
+    const MAX_PACKETS = 6;
+    const FADE_IN = 1600;
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
@@ -39,11 +45,17 @@ export default function NetworkCanvas() {
         y: Math.random() * h,
         vx: (Math.random() - 0.5) * 0.25,
         vy: (Math.random() - 0.5) * 0.25,
+        flash: 0,
       }));
+      packets = [];
     };
 
     const draw = () => {
       ctx.clearRect(0, 0, w, h);
+      // Ease the whole network in on first load.
+      const p = reduced ? 1 : Math.min(1, (performance.now() - born) / FADE_IN);
+      ctx.globalAlpha = 1 - (1 - p) ** 3;
+
       for (let i = 0; i < nodes.length; i++) {
         const a = nodes[i];
         for (let j = i + 1; j < nodes.length; j++) {
@@ -56,6 +68,10 @@ export default function NetworkCanvas() {
             ctx.moveTo(a.x, a.y);
             ctx.lineTo(b.x, b.y);
             ctx.stroke();
+            if (running && packets.length < MAX_PACKETS && Math.random() < 0.0005) {
+              const forward = Math.random() < 0.5;
+              packets.push({ from: forward ? a : b, to: forward ? b : a, t: 0, speed: 0.006 + Math.random() * 0.008 });
+            }
           }
         }
         const dm = Math.hypot(a.x - mouse.x, a.y - mouse.y);
@@ -66,11 +82,44 @@ export default function NetworkCanvas() {
           ctx.lineTo(mouse.x, mouse.y);
           ctx.stroke();
         }
-        ctx.fillStyle = dm < REACH ? "rgba(169,155,255,0.9)" : "rgba(255,255,255,0.28)";
-        ctx.beginPath();
-        ctx.arc(a.x, a.y, dm < REACH ? 1.8 : 1.2, 0, Math.PI * 2);
+        if (dm < REACH || a.flash > 0) {
+          const alpha = dm < REACH ? 0.9 : 0.3 + 0.7 * a.flash;
+          ctx.fillStyle = `rgba(169,155,255,${alpha})`;
+          ctx.beginPath();
+          ctx.arc(a.x, a.y, 1.8 + a.flash * 1.4, 0, Math.PI * 2);
+        } else {
+          ctx.fillStyle = "rgba(255,255,255,0.28)";
+          ctx.beginPath();
+          ctx.arc(a.x, a.y, 1.2, 0, Math.PI * 2);
+        }
         ctx.fill();
       }
+
+      // Packets: a bright head with a short fading trail.
+      for (const pk of packets) {
+        const { from, to, t } = pk;
+        const x = from.x + (to.x - from.x) * t;
+        const y = from.y + (to.y - from.y) * t;
+        const tt = Math.max(0, t - 0.18);
+        const trail = ctx.createLinearGradient(from.x + (to.x - from.x) * tt, from.y + (to.y - from.y) * tt, x, y);
+        trail.addColorStop(0, "rgba(124,92,255,0)");
+        trail.addColorStop(1, "rgba(169,155,255,0.75)");
+        ctx.strokeStyle = trail;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(from.x + (to.x - from.x) * tt, from.y + (to.y - from.y) * tt);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        ctx.fillStyle = "rgba(124,92,255,0.18)";
+        ctx.beginPath();
+        ctx.arc(x, y, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "rgba(214,207,255,0.95)";
+        ctx.beginPath();
+        ctx.arc(x, y, 1.6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
     };
 
     const step = () => {
@@ -79,7 +128,17 @@ export default function NetworkCanvas() {
         n.y += n.vy;
         if (n.x < 0 || n.x > w) n.vx *= -1;
         if (n.y < 0 || n.y > h) n.vy *= -1;
+        if (n.flash > 0) n.flash = Math.max(0, n.flash - 0.02);
       }
+      packets = packets.filter((pk) => {
+        pk.t += pk.speed;
+        if (pk.t >= 1) {
+          pk.to.flash = 1; // Delivered: the receiving node pulses.
+          return false;
+        }
+        // Drop packets whose link has stretched past breaking point.
+        return Math.hypot(pk.from.x - pk.to.x, pk.from.y - pk.to.y) < LINK * 1.15;
+      });
       draw();
       raf = requestAnimationFrame(step);
     };
@@ -133,5 +192,5 @@ export default function NetworkCanvas() {
     };
   }, []);
 
-  return <canvas ref={ref} aria-hidden className="pointer-events-none absolute inset-0 size-full" />;
+  return <canvas ref={ref} aria-hidden className="hero-fade pointer-events-none absolute inset-0 size-full" />;
 }

@@ -76,15 +76,3 @@ export const Layout = ({ className = "size-5" }: P) => (
     <path d="M3 9h18M9 20V9" />
   </svg>
 );
-
-export const Menu = ({ className = "size-5" }: P) => (
-  <svg viewBox="0 0 24 24" className={className} {...base}>
-    <path d="M4 7h16M4 12h16M4 17h16" />
-  </svg>
-);
-
-export const Close = ({ className = "size-5" }: P) => (
-  <svg viewBox="0 0 24 24" className={className} {...base}>
-    <path d="M6 6l12 12M18 6 6 18" />
-  </svg>
-);
